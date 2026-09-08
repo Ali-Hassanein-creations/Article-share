@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<h2>Create an Account</h2>
+<form action="{{ url_for('register') }}" method="post" class="form">
+  <label>Username</label>
+  <input name="username" type="text" required>
+
+  <label>Email</label>
+  <input name="email" type="email" required>
+
+  <label>Password</label>
+  <input name="password" type="password" required>
+
+  <button type="submit">Register</button>
+</form>
+{% endblock %}

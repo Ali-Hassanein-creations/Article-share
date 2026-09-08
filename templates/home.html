@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>All Articles</h2>
+{% if current_user.is_authenticated %}
+<p>Logged in as: <strong>{{ current_user.username }}</strong></p>
+{% endif %}
+
+{% if articles|length == 0 %}
+  <p>No articles yet. Be the first to write one!</p>
+{% endif %}
+
+{% for a in articles %}
+  <article class="card">
+    <h3>{{ a.title }}</h3>
+    <div class="meta">by {{ a.author.username }} — {{ a.timestamp.strftime("%Y-%m-%d %H:%M") }}</div>
+    <p class="body">{{ a.body }}</p>
+
+    {% if current_user.is_authenticated and (current_user.id == a.author_id or current_user.role == 'admin') %}
+      <form action="{{ url_for('delete_article', article_id=a.id) }}" method="post" style="display:inline;">
+        <button type="submit">Delete Article</button>
+      </form>
+    {% endif %}
+
+    <section class="comments">
+      <h4>Comments</h4>
+      {% if a.comments|length == 0 %}
+        <p class="muted">No comments yet.</p>
+      {% endif %}
+
+      {% for c in a.comments|sort(attribute='timestamp', reverse=false) %}
+        <div class="comment">
+          <div class="meta">
+            {{ c.commenter.username }} — {{ c.timestamp.strftime("%Y-%m-%d %H:%M") }}
+          </div>
+          <div class="text">{{ c.body }}</div>
+
+          {% if current_user.is_authenticated and (current_user.id == c.author_id or current_user.role == 'admin') %}
+            <form action="{{ url_for('delete_comment', comment_id=c.id) }}" method="post" style="display:inline;">
+              <button type="submit">Delete</button>
+            </form>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </section>
+
+    {% if current_user.is_authenticated %}
+      <form action="{{ url_for('comment', article_id=a.id) }}" method="post" class="new-comment">
+        <textarea name="body" rows="2" placeholder="Add a comment..." required></textarea>
+        <button type="submit">Post Comment</button>
+      </form>
+    {% else %}
+      <p class="muted">Log in to add a comment.</p>
+    {% endif %}
+  </article>
+{% endfor %}
+{% endblock %}
